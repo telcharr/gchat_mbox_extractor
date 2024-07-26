@@ -9,7 +9,7 @@ pub fn split_mbox_entries(content: &str) -> Result<Vec<MboxEntry>, Box<dyn Error
     let parts: Vec<&str> = content.split("\nFrom ").collect();
 
     let entries: Vec<MboxEntry> = parts.par_iter().skip(1).filter_map(|part| {
-        let mut lines: Lines = part.lines();
+        let lines: Lines = part.lines();
         let mut headers: String = String::new();
         let mut body: String = String::new();
         let mut in_headers: bool = true;

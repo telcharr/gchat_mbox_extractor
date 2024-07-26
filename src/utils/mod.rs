@@ -1,6 +1,8 @@
 mod file_utils;
+mod csv_utils;
 
-pub use file_utils::read_mbox_file;
+pub use file_utils::{read_mbox_file, write_attachment_to_file};
+pub use csv_utils::write_messages_to_csv;
 
 use quoted_printable::ParseMode;
 use std::error::Error;
