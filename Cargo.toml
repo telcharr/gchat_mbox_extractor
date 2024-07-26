@@ -1,0 +1,10 @@
+[package]
+name = "gchat_mbox_extractor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+quoted_printable = "0.5.1"
+regex = "1.10.5"
+base64 = "0.22.1"
+html-escape = "0.2.13"
