@@ -6,6 +6,6 @@ use quoted_printable::ParseMode;
 use std::error::Error;
 
 pub fn decode_quoted_printable(input: &str) -> Result<String, Box<dyn Error>> {
-    let decoded = quoted_printable::decode(input.as_bytes(), ParseMode::Robust)?;
+    let decoded: Vec<u8> = quoted_printable::decode(input.as_bytes(), ParseMode::Robust)?;
     Ok(String::from_utf8_lossy(&decoded).to_string())
 }
