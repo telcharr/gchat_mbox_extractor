@@ -13,3 +13,7 @@ eframe = "0.28.1"
 egui = "0.28.1"
 rfd = "0.14.1"
 chrono = "0.4.38"
+
+[target.x86_64-pc-windows-gnu]
+linker = "x86_64-w64-mingw32-gcc"
+ar = "x86_64-w64-mingw32-gcc-ar"
