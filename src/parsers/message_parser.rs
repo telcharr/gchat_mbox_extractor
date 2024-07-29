@@ -5,6 +5,15 @@ use html_escape::decode_html_entities;
 use rayon::prelude::*;
 use chrono::{DateTime, FixedOffset, TimeZone, NaiveDate, NaiveTime, NaiveDateTime};
 
+/// Splits the HTML content into individual raw messages.
+///
+/// # Arguments
+///
+/// * `html` - A string slice containing the entire HTML content of the .mbox file.
+///
+/// # Returns
+///
+/// A vector of `RawMessage` structs, each containing the content of a single message.
 pub fn split_messages(html: &str) -> Vec<RawMessage> {
     let split_pattern: &str = "<div data-id=\"";
     let parts: Vec<&str> = html.split(split_pattern).collect();
@@ -19,6 +28,15 @@ pub fn split_messages(html: &str) -> Vec<RawMessage> {
         .collect()
 }
 
+/// Parses a raw message content into a structured `Message` object.
+///
+/// # Arguments
+///
+/// * `raw_content` - A string slice containing the raw HTML content of a single message.
+///
+/// # Returns
+///
+/// An `Option<Message>` containing the parsed message if successful, or `None` if parsing fails.
 pub fn parse_message(raw_content: &str) -> Option<Message> {
     let id_regex: Regex = Regex::new(r#"<div data-id="([^"]+)""#).ok()?;
     let message_id: String = id_regex.captures(raw_content)?.get(1)?.as_str().to_string();
@@ -48,6 +66,15 @@ pub fn parse_message(raw_content: &str) -> Option<Message> {
     })
 }
 
+/// Parse and format a raw timestamp string into RFC 3339 format.
+///
+/// # Arguments
+///
+/// * `raw_timestamp` - A string slice containing the raw timestamp from the message.
+///
+/// # Returns
+///
+/// A `String` containing the parsed and formatted timestamp in RFC 3339 format.
 fn parse_and_format_timestamp(raw_timestamp: &str) -> String {
     // Replace non-breaking space with regular space
     let cleaned_timestamp: String = raw_timestamp.replace('\u{202F}', " ");
@@ -80,6 +107,15 @@ fn parse_and_format_timestamp(raw_timestamp: &str) -> String {
     raw_timestamp.to_string()
 }
 
+/// Cleans the message content by removing HTML tags, decoding entities, and trimming unnecessary text.
+///
+/// # Arguments
+///
+/// * `content` - A string slice containing the raw message content.
+///
+/// # Returns
+///
+/// A `String` containing the cleaned message content.
 fn clean_message_content(content: &str) -> String {
     let tag_regex: Regex = Regex::new(r"<[^>]+>").unwrap();
     let without_tags: Cow<str> = tag_regex.replace_all(content, "");

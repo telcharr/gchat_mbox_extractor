@@ -5,6 +5,19 @@ use std::error::Error;
 use rayon::prelude::*;
 use core::str::Lines;
 
+/// Splits the content of an .mbox file into individual MboxEntry objects.
+///
+/// # Arguments
+///
+/// * `content` - A string slice containing the entire content of the .mbox file.
+///
+/// # Returns
+///
+/// A `Result` containing a vector of `MboxEntry` structs if successful, or a boxed error if parsing fails.
+///
+/// # Errors
+///
+/// This function will return an error if any of the parsing steps fail.
 pub fn split_mbox_entries(content: &str) -> Result<Vec<MboxEntry>, Box<dyn Error>> {
     let parts: Vec<&str> = content.split("\nFrom ").collect();
 

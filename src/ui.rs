@@ -18,6 +18,7 @@ const TEXT_COLOR: Color32 = Color32::from_rgb(211,211,212);
 const BUTTON_COLOR: Color32 = Color32::from_rgb(52,58,64);
 const HOVER_COLOR: Color32 = Color32::from_rgb(72,77,83);
 
+/// Represents the main application state for the GUI.
 pub struct MboxExtractorApp {
     mbox_path: Option<PathBuf>,
     export_attachments: bool,
@@ -57,6 +58,13 @@ impl Default for MboxExtractorApp {
 }
 
 impl eframe::App for MboxExtractorApp {
+    /// This is called by the eframe runtime on each frame.
+    /// It handles the main UI layout, updates the application state, and manages the processing flow.
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - The egui context, used for UI rendering and input handling.
+    /// * `_frame` - The eframe, currently unused in this implementation.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let frame: Frame = Frame::default()
             .fill(BG_COLOR)
@@ -110,6 +118,12 @@ impl eframe::App for MboxExtractorApp {
 }
 
 impl MboxExtractorApp {
+    /// Creates a button for MBOX file selection and displays the selected file path.
+    /// This uses a file dialog to allow the user to choose an MBOX file.
+    ///
+    /// # Arguments
+    ///
+    /// * `ui` - The egui Ui object used for rendering UI elements.
     fn render_file_selection(&mut self, ui: &mut Ui) {
         ui.vertical_centered(|ui: &mut Ui| {
             if self.animated_button(ui, "Select MBOX File", 0) {
@@ -124,6 +138,12 @@ impl MboxExtractorApp {
         });
     }
 
+    /// Creates a button for output folder selection, displays the selected folder path,
+    /// and provides a checkbox for toggling attachment export.
+    ///
+    /// # Arguments
+    ///
+    /// * `ui` - The egui Ui object used for rendering UI elements.
     fn render_output_selection(&mut self, ui: &mut Ui) {
         ui.vertical_centered(|ui: &mut Ui| {
             if self.animated_button(ui, "Select Output Folder", 1) {
@@ -140,6 +160,12 @@ impl MboxExtractorApp {
         });
     }
 
+    /// Creates a button to start the MBOX processing.
+    /// The button is only enabled when both the MBOX file and output folder have been selected.
+    ///
+    /// # Arguments
+    ///
+    /// * `ui` - The egui Ui object used for rendering UI elements.
     fn render_process_button(&mut self, ui: &mut Ui) {
         ui.vertical_centered(|ui: &mut Ui| {
             if self.mbox_path.is_some() && self.output_path.is_some() {
@@ -156,6 +182,12 @@ impl MboxExtractorApp {
         });
     }
 
+    /// Displays a progress bar and a "Processing..." label when the MBOX
+    /// file is being processed.
+    ///
+    /// # Arguments
+    ///
+    /// * `ui` - The egui Ui object used for rendering UI elements.
     fn render_processing(&mut self, ui: &mut Ui) {
         ui.vertical_centered(|ui: &mut Ui| {
             ui.add_space(20.0);
@@ -168,10 +200,15 @@ impl MboxExtractorApp {
         });
     }
 
+    /// Displays the result of the MBOX processing, including any error messages.
+    ///
+    /// # Arguments
+    ///
+    /// * `ui` - The egui Ui object used for rendering UI elements.
     fn render_result(&self, ui: &mut Ui) {
         ui.vertical_centered(|ui: &mut Ui| {
             if !self.result.is_empty() {
-                let color = Color32::from_rgba_unmultiplied(
+                let color: Color32 = Color32::from_rgba_unmultiplied(
                     TEXT_COLOR.r(),
                     TEXT_COLOR.g(),
                     TEXT_COLOR.b(),
@@ -182,6 +219,12 @@ impl MboxExtractorApp {
         });
     }
 
+    /// This handles the smooth transitions for the progress bar, result text fade,
+    /// and button hover effects.
+    ///
+    /// # Arguments
+    ///
+    /// * `ctx` - The egui context, used for getting the frame time.
     fn update_animations(&mut self, ctx: &egui::Context) {
         let dt: f32 = ctx.input(|i: &InputState| i.unstable_dt).min(0.1);
 
@@ -209,6 +252,7 @@ impl MboxExtractorApp {
         }
     }
 
+    /// Initiates the MBOX processing in a separate thread.
     fn process_mbox_if_ready(&mut self) {
         if self.processing {
             let mbox_path: Option<PathBuf> = self.mbox_path.clone();
@@ -233,6 +277,7 @@ impl MboxExtractorApp {
         }
     }
 
+    /// Resets the application state after processing is complete.
     fn finish_processing(&mut self) {
         self.processing = false;
         self.progress = None;
@@ -245,6 +290,17 @@ impl MboxExtractorApp {
         self.processing_complete = false;
     }
 
+    /// Creates a custom button with smooth color transitions on hover.
+    ///
+    /// # Arguments
+    ///
+    /// * `ui` - The egui Ui object used for rendering UI elements.
+    /// * `text` - The text to display on the button.
+    /// * `index` - The index of the button, used for tracking its animation state.
+    ///
+    /// # Returns
+    ///
+    /// Returns `true` if the button was clicked, `false` otherwise.
     fn animated_button(&mut self, ui: &mut Ui, text: &str, index: usize) -> bool {
         let desired_size: Vec2 = Vec2::new(200.0, 40.0);
         let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
@@ -257,7 +313,7 @@ impl MboxExtractorApp {
         self.button_animations[index] = self.button_animations[index].clamp(0.0, 1.0);
 
         let lerp: fn(f32, f32, f32) -> f32  = |a: f32, b: f32, t: f32| a + (b - a) * t;
-        let fill_color = Color32::from_rgb(
+        let fill_color: Color32 = Color32::from_rgb(
             lerp(BUTTON_COLOR.r() as f32, HOVER_COLOR.r() as f32, self.button_animations[index]) as u8,
             lerp(BUTTON_COLOR.g() as f32, HOVER_COLOR.g() as f32, self.button_animations[index]) as u8,
             lerp(BUTTON_COLOR.b() as f32, HOVER_COLOR.b() as f32, self.button_animations[index]) as u8,
@@ -291,6 +347,20 @@ impl MboxExtractorApp {
     }
 }
 
+/// This handles the core logic of parsing the MBOX file, extracting messages
+/// and attachments, and writing the results to the specified output location.
+///
+/// # Arguments
+///
+/// * `mbox_path` - The path to the input MBOX file.
+/// * `output_path` - The path to the output directory for extracted data.
+/// * `export_attachments` - A flag indicating whether to export attachments.
+/// * `progress_tx` - A channel sender for reporting progress to the UI thread.
+///
+/// # Returns
+///
+/// Returns `Ok(())` if processing completes successfully, or an `Err` containing
+/// the error message if any step fails.
 fn process_mbox(
     mbox_path: &PathBuf,
     output_path: &PathBuf,
@@ -324,6 +394,13 @@ fn process_mbox(
     Ok(())
 }
 
+/// Sets up the eframe native options, initializes the application state,
+/// and starts the main event loop.
+///
+/// # Returns
+///
+/// Returns `Ok(())` if the application runs and closes successfully, or an `Err`
+/// if there's an error during initialization or execution.
 pub fn run_ui() -> Result<(), eframe::Error> {
     let options: NativeOptions = NativeOptions {
         viewport: egui::ViewportBuilder::default()

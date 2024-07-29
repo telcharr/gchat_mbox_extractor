@@ -1,5 +1,14 @@
 use crate::models::Attachment;
 
+/// Extracts HTML content and attachments from the message body.
+///
+/// # Arguments
+///
+/// * `body` - A string slice containing the message body.
+///
+/// # Returns
+///
+/// A tuple containing the HTML body as a String and a vector of Attachment structs.
 pub fn extract_html_and_attachments(body: &str) -> (String, Vec<Attachment>) {
     let mut html_body: String = String::new();
     let mut attachments: Vec<Attachment> = Vec::new();
@@ -19,6 +28,15 @@ pub fn extract_html_and_attachments(body: &str) -> (String, Vec<Attachment>) {
     (html_body, attachments)
 }
 
+/// Extracts attachment information from a message part.
+///
+/// # Arguments
+///
+/// * `part` - A string slice containing a single part of the message.
+///
+/// # Returns
+///
+/// An Option containing an Attachment struct if successful, or None if extraction fails.
 fn extract_attachment(part: &str) -> Option<Attachment> {
     let mut content_type: String = String::new();
     let mut filename: String = String::new();
