@@ -3,7 +3,7 @@ use eframe::{CreationContext, egui, epaint::Color32, NativeOptions};
 use rfd::FileDialog;
 use std::path::PathBuf;
 use eframe::emath::NumExt;
-use egui::{Frame, Rounding, Stroke, RichText, Vec2, Ui, InputState, Rect};
+use egui::{Frame, Rounding, Stroke, RichText, Vec2, Ui, InputState, Rect, ProgressBar};
 use std::time::{Instant, Duration};
 use egui::style::WidgetVisuals;
 use crate::models::{MboxEntry, Message};
@@ -159,7 +159,7 @@ impl MboxExtractorApp {
     fn render_processing(&mut self, ui: &mut Ui) {
         ui.vertical_centered(|ui: &mut Ui| {
             ui.add_space(20.0);
-            let progress_bar = egui::ProgressBar::new(self.animated_progress)
+            let progress_bar: ProgressBar = ProgressBar::new(self.animated_progress)
                 .animate(true)
                 .show_percentage()
                 .desired_width(200.0);
@@ -250,9 +250,9 @@ impl MboxExtractorApp {
         let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
 
         if response.hovered() {
-            self.button_animations[index] += ui.ctx().input(|i| i.unstable_dt).at_most(8.0);
+            self.button_animations[index] += ui.ctx().input(|i: &InputState| i.unstable_dt).at_most(8.0);
         } else {
-            self.button_animations[index] -= ui.ctx().input(|i| i.unstable_dt).at_most(2.5);
+            self.button_animations[index] -= ui.ctx().input(|i: &InputState| i.unstable_dt).at_most(2.5);
         }
         self.button_animations[index] = self.button_animations[index].clamp(0.0, 1.0);
 
