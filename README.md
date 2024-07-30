@@ -2,9 +2,11 @@
 
 ## What's this?
 
-Welcome to the Google Chat MBOX Extractor, a tool born out of frustration. If you're an IT pro or Google Workspace admin, you've probably encountered the joy (read: pain) of dealing with Google Chat .mbox exports.
-
-I looked for a tool to parse these .mbox exports, but found nothing. So, I made my own. This app is designed to help you dig through and analyze Google Chat MBOX archives without losing your sanity.
+If you're an IT pro or Google Workspace admin,
+you've probably encountered the joy (read: pain) of dealing with Google Chat .mbox exports.
+I looked for a tool to parse these .mbox exports, but found nothing.
+So, I made my own.
+This app is designed to help you dig through and analyze Google Chat MBOX archives without losing your sanity.
 
 ## What does it do?
 
