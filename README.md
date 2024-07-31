@@ -17,6 +17,14 @@ This app takes your Google Chat MBOX file and:
 
 All wrapped up in a (somewhat) pretty GUI package.
 
+## Building from source
+
+1. Ensure you have Rust installed (if not, visit [rustup.rs](https://rustup.rs))
+2. Clone this repository
+3. Run `cargo build --release`
+4. Find the executable in `target/release`
+5. Run the executable to start the application
+
 ## How to use it?
 
 1. Launch the application
@@ -25,16 +33,6 @@ All wrapped up in a (somewhat) pretty GUI package.
 4. Decide if you want to extract attachments (check the box if so)
 5. Click "Process MBOX" to start the extraction
 6. Once complete, you'll find your extracted data in the output folder
-
-## Building from source
-
-If you'd like to build the application yourself:
-
-1. Ensure you have Rust installed (if not, visit [rustup.rs](https://rustup.rs))
-2. Clone this repository
-3. Run `cargo build --release`
-4. Find the executable in `target/release`
-5. Run the executable to start the application
 
 ## A note on the UI
 
