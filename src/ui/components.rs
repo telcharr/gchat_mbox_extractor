@@ -1,22 +1,12 @@
 use egui::{Ui, RichText, Frame, Color32, Rounding, Stroke, Vec2, Rect, Sense, ProgressBar};
 
-use super::app::MboxExtractorApp;
+use super::app::{MboxExtractorApp, Action};
 
 const BG_COLOR: Color32 = Color32::from_rgb(33, 37, 41);
 const ACCENT_COLOR: Color32 = Color32::from_rgb(72,77,83);
 const TEXT_COLOR: Color32 = Color32::from_rgb(211,211,212);
 const BUTTON_COLOR: Color32 = Color32::from_rgb(52,58,64);
 const HOVER_COLOR: Color32 = Color32::from_rgb(72,77,83);
-
-pub enum Action {
-    OpenMboxFileDialog,
-    OpenOutputFolderDialog,
-    ToggleExportAttachments,
-    StartProcessing,
-    UpdateProgress(f32),
-    FinishProcessing,
-    SetButtonHoverState(usize, bool),
-}
 
 /// Called to render UI elements
 pub fn render_ui(app: &MboxExtractorApp, ctx: &egui::Context) -> Vec<Action> {

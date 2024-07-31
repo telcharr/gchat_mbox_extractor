@@ -5,9 +5,20 @@ use std::sync::mpsc::{channel, Receiver, Sender};
 use rfd::FileDialog;
 use std::thread;
 
-use super::components::{Action, render_ui};
+use super::components::render_ui;
 use super::animations::update_animations;
 use super::processing::process_mbox;
+
+pub enum Action {
+    OpenMboxFileDialog,
+    OpenOutputFolderDialog,
+    ToggleExportAttachments,
+    StartProcessing,
+    UpdateProgress(f32),
+    FinishProcessing,
+    SetButtonHoverState(usize, bool),
+    UpdateButtonAnimation(usize, f32),
+}
 
 /// Represents the main application state
 pub struct MboxExtractorApp {
@@ -23,9 +34,10 @@ pub struct MboxExtractorApp {
     pub result_animation: f32,
     pub processing_start_time: Option<Instant>,
     pub result_start_time: Option<Instant>,
+    pub processing_complete: bool,
+    pub final_progress: bool,
     progress_rx: Option<Receiver<f32>>,
     result_rx: Option<Receiver<String>>,
-    processing_complete: bool,
     file_dialog_rx: Receiver<Option<PathBuf>>,
     file_dialog_tx: Sender<Option<PathBuf>>,
     folder_dialog_rx: Receiver<Option<PathBuf>>,
@@ -57,6 +69,7 @@ impl MboxExtractorApp {
             file_dialog_tx,
             folder_dialog_rx,
             folder_dialog_tx,
+            final_progress: false,
         }
     }
 
@@ -67,10 +80,16 @@ impl MboxExtractorApp {
             Action::OpenOutputFolderDialog => self.open_folder_dialog(),
             Action::ToggleExportAttachments => self.export_attachments = !self.export_attachments,
             Action::StartProcessing => self.start_processing(),
-            Action::UpdateProgress(progress) => self.progress = Some(progress),
+            Action::UpdateProgress(progress) => {
+                self.progress = Some(progress);
+                self.animated_progress = progress;
+            },
             Action::FinishProcessing => self.finish_processing(),
             Action::SetButtonHoverState(index, hovered) => {
                 self.button_hover_states[index] = hovered;
+            },
+            Action::UpdateButtonAnimation(index, animation) => {
+                self.button_animations[index] = animation;
             },
         }
     }
@@ -103,6 +122,7 @@ impl MboxExtractorApp {
         self.animated_progress = 0.0;
         self.processing_start_time = Some(Instant::now());
         self.processing_complete = false;
+        self.final_progress = false;
         self.process_mbox_if_ready();
     }
 
@@ -138,6 +158,7 @@ impl MboxExtractorApp {
         self.progress_rx = None;
         self.result_rx = None;
         self.processing_complete = false;
+        self.final_progress = false;
     }
 
     /// Called to check for and update file dialogue results
@@ -175,10 +196,15 @@ impl eframe::App for MboxExtractorApp {
             }
         }
 
-        update_animations(self, ctx);
+        let animation_actions: Vec<Action> = update_animations(self, ctx);
+        for action in animation_actions {
+            self.update(action);
+        }
 
-        if self.processing_complete && self.animated_progress > 0.99 {
-            self.animated_progress = 1.0;
+        if self.processing_complete && !self.final_progress {
+            self.update(Action::UpdateProgress(1.0));
+            self.final_progress = true;
+        } else if self.final_progress && self.animated_progress >= 0.99 {
             self.finish_processing();
         }
 
