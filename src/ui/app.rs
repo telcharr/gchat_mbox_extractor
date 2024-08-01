@@ -2,7 +2,7 @@ use eframe::{CreationContext, egui, NativeOptions};
 use std::path::PathBuf;
 use std::time::Instant;
 use std::sync::mpsc::{channel, Receiver, Sender};
-use rfd::FileDialog;
+use native_dialog::FileDialog;
 use std::thread;
 
 use super::components::render_ui;
@@ -100,7 +100,8 @@ impl MboxExtractorApp {
         thread::spawn(move || {
             let result: Option<PathBuf> = FileDialog::new()
                 .add_filter("MBOX", &["mbox"])
-                .pick_file();
+                .show_open_single_file()
+                .unwrap_or(None);
             tx.send(result).unwrap();
         });
     }
@@ -109,7 +110,9 @@ impl MboxExtractorApp {
     fn open_folder_dialog(&mut self) {
         let tx: Sender<Option<PathBuf>> = self.folder_dialog_tx.clone();
         thread::spawn(move || {
-            let result: Option<PathBuf> = FileDialog::new().pick_folder();
+            let result: Option<PathBuf> = FileDialog::new()
+                .show_open_single_dir()
+                .unwrap_or(None);
             tx.send(result).unwrap();
         });
     }
