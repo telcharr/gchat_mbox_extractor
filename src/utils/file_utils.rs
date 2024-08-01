@@ -47,7 +47,21 @@ pub fn write_attachment_to_file(attachment: &Attachment, folder: &str) -> Result
         fs::create_dir_all(folder_path)?;
     }
 
-    let file_path: PathBuf = folder_path.join(&attachment.filename);
+    let mut counter: i32 = 1;
+    let original_filename: &String = &attachment.filename;
+    let mut file_path: PathBuf;
+
+    loop {
+        let new_filename: String = format!("{}_{}", counter, original_filename);
+        file_path = folder_path.join(&new_filename);
+
+        if !file_path.exists() {
+            break;
+        }
+
+        counter += 1;
+    }
+
     let decoded_content: Vec<u8> = BASE64_STANDARD.decode(&attachment.content)?;
 
     fs::write(file_path, decoded_content)?;
