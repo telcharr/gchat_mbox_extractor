@@ -1349,6 +1349,7 @@ dependencies = [
  "quoted_printable",
  "rayon",
  "regex",
+ "winapi",
 ]
 
 [[package]]

@@ -221,7 +221,9 @@ pub fn run_ui() -> Result<(), eframe::Error> {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([400.0, 450.0])
             .with_min_inner_size([400.0, 450.0])
-            .with_resizable(false),
+            .with_resizable(false)
+            .with_fullscreen(false)
+            .with_maximize_button(false),
         ..Default::default()
     };
     eframe::run_native(
