@@ -65,11 +65,11 @@ impl MboxExtractorApp {
             progress_rx: None,
             result_rx: None,
             processing_complete: false,
+            final_progress: false,
             file_dialog_rx,
             file_dialog_tx,
             folder_dialog_rx,
             folder_dialog_tx,
-            final_progress: false,
         }
     }
 
