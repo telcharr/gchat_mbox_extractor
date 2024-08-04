@@ -20,6 +20,16 @@ pub enum Action {
     UpdateButtonAnimation(usize, f32),
 }
 
+enum DialogType {
+    File,
+    Folder,
+}
+
+enum DialogMessage {
+    Open(DialogType),
+    Result(DialogType, Option<PathBuf>),
+}
+
 /// Represents the main application state
 pub struct MboxExtractorApp {
     pub mbox_path: Option<PathBuf>,
@@ -38,16 +48,14 @@ pub struct MboxExtractorApp {
     pub final_progress: bool,
     progress_rx: Option<Receiver<f32>>,
     result_rx: Option<Receiver<String>>,
-    file_dialog_rx: Receiver<Option<PathBuf>>,
-    file_dialog_tx: Sender<Option<PathBuf>>,
-    folder_dialog_rx: Receiver<Option<PathBuf>>,
-    folder_dialog_tx: Sender<Option<PathBuf>>,
+    dialog_rx: Receiver<DialogMessage>,
+    dialog_tx: Sender<DialogMessage>,
+    current_dialog: Option<DialogType>
 }
 
 impl MboxExtractorApp {
     fn new() -> Self {
-        let (file_dialog_tx, file_dialog_rx) = channel();
-        let (folder_dialog_tx, folder_dialog_rx) = channel();
+        let (dialog_tx, dialog_rx) = channel();
 
         Self {
             mbox_path: None,
@@ -66,10 +74,9 @@ impl MboxExtractorApp {
             result_rx: None,
             processing_complete: false,
             final_progress: false,
-            file_dialog_rx,
-            file_dialog_tx,
-            folder_dialog_rx,
-            folder_dialog_tx,
+            dialog_tx,
+            dialog_rx,
+            current_dialog: None,
         }
     }
 
@@ -96,25 +103,31 @@ impl MboxExtractorApp {
 
     /// Opens the file dialogue window
     fn open_file_dialog(&mut self) {
-        let tx: Sender<Option<PathBuf>> = self.file_dialog_tx.clone();
-        thread::spawn(move || {
-            let result: Option<PathBuf> = FileDialog::new()
-                .add_filter("MBOX", &["mbox"])
-                .show_open_single_file()
-                .unwrap_or(None);
-            tx.send(result).unwrap();
-        });
+        if self.current_dialog.is_none() {
+            self.current_dialog = Some(DialogType::File);
+            let tx: Sender<DialogMessage> = self.dialog_tx.clone();
+            thread::spawn(move || {
+                let result = FileDialog::new()
+                    .add_filter("MBOX", &["mbox"])
+                    .show_open_single_file()
+                    .unwrap_or(None);
+                tx.send(DialogMessage::Result(DialogType::File, result)).unwrap();
+            });
+        }
     }
 
     /// Opens the folder dialogue window
     fn open_folder_dialog(&mut self) {
-        let tx: Sender<Option<PathBuf>> = self.folder_dialog_tx.clone();
-        thread::spawn(move || {
-            let result: Option<PathBuf> = FileDialog::new()
-                .show_open_single_dir()
-                .unwrap_or(None);
-            tx.send(result).unwrap();
-        });
+        if self.current_dialog.is_none() {
+            self.current_dialog = Some(DialogType::Folder);
+            let tx: Sender<DialogMessage> = self.dialog_tx.clone();
+            thread::spawn(move || {
+                let result = FileDialog::new()
+                    .show_open_single_dir()
+                    .unwrap_or(None);
+                tx.send(DialogMessage::Result(DialogType::Folder, result)).unwrap();
+            });
+        }
     }
 
     /// Initializes MBOX processing
@@ -165,12 +178,19 @@ impl MboxExtractorApp {
     }
 
     /// Called to check for and update file dialogue results
-    fn check_file_dialog_results(&mut self) {
-        if let Ok(result) = self.file_dialog_rx.try_recv() {
-            self.mbox_path = result;
-        }
-        if let Ok(result) = self.folder_dialog_rx.try_recv() {
-            self.output_path = result;
+    fn check_dialog_results(&mut self) {
+        if let Ok(message) = self.dialog_rx.try_recv() {
+            match message {
+                DialogMessage::Result(DialogType::File, result) => {
+                    self.mbox_path = result;
+                    self.current_dialog = None;
+                }
+                DialogMessage::Result(DialogType::Folder, result) => {
+                    self.output_path = result;
+                    self.current_dialog = None;
+                }
+                _ => {}
+            }
         }
     }
 }
@@ -182,7 +202,7 @@ impl eframe::App for MboxExtractorApp {
             self.update(action);
         }
 
-        self.check_file_dialog_results();
+        self.check_dialog_results();
 
         if let Some(rx) = &self.progress_rx {
             if let Ok(progress) = rx.try_recv() {
