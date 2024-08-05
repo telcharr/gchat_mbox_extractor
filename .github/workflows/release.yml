@@ -3,7 +3,7 @@ on:
   push:
     tags:
       - 'v*'
-
+      
 jobs:
   release:
     name: Release ${{ matrix.os }}
@@ -17,6 +17,9 @@ jobs:
           - os: windows-latest
             artifact_name: gchat_mbox_extractor.exe
             asset_name: gchat_mbox_extractor-windows-amd64.exe
+          - os: macos-latest
+            artifact_name: gchat_mbox_extractor
+            asset_name: gchat_mbox_extractor-macos-amd64
 
     steps:
       - uses: actions/checkout@v4
@@ -32,6 +35,10 @@ jobs:
 
       - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
+        run: cargo build --release
+
+      - name: Build for macOS
+        if: matrix.os == 'macos-latest'
         run: cargo build --release
 
       - name: Rename artifact
