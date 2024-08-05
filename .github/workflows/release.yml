@@ -34,10 +34,6 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: cargo build --release
 
-      - name: Build for macOS
-        if: matrix.os == 'macos-latest'
-        run: cargo build --release
-
       - name: Rename artifact
         run: |
           mv target/release/${{ matrix.artifact_name }} ${{ matrix.asset_name }}
