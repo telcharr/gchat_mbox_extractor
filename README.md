@@ -2,7 +2,7 @@
 
 ## What's this?
 
-If you're an IT pro or Google Workspace admin,
+If you're a Google Workspace admin,
 you've probably encountered the joy (read: pain) of dealing with Google Chat .mbox exports.
 I looked for a tool to parse these .mbox exports, but found nothing.
 So, I made my own.
@@ -33,11 +33,3 @@ All wrapped up in a (somewhat) pretty GUI package.
 4. Decide if you want to extract attachments (check the box if so)
 5. Click "Process MBOX" to start the extraction
 6. Once complete, you'll find your extracted data in the output folder
-
-## A note on the UI
-
-UI design isn't my strong suit. If you open this up and your eyes hurt, I apologize in advance. If there are any UI wizards out there who want to take a crack at making this look less like it was designed by backend engineer (me), please feel free to submit a PR.
-
-## Contributing
-
-Found a bug? Have an idea for a feature? Want to tell me my code looks like spaghetti? Feel free to open an issue or submit a PR.
